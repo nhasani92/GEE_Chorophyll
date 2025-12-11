@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Earth Engine Dashboard - Chlorophyll Monitor</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+    <!-- Google APIs for OAuth -->
+    <script src="https://apis.google.com/js/api.js"></script>
+
+    <!-- Earth Engine API -->
+    <script src="https://www.gstatic.com/earthengine/ee_api_js.js"></script>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p id="loadingText">Initializing Earth Engine...</p>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-globe-americas me-2"></i>Earth Engine Dashboard
+            </a>
+            <div class="d-flex align-items-center">
+                <span id="userStatus" class="text-light me-3">Not Authenticated</span>
+                <button id="authBtn" class="btn btn-light btn-sm">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-sliders-h"></i> Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Dataset Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Select Dataset</label>
+                            <select id="datasetSelect" class="form-select">
+                                <option value="landsat8">Landsat 8 (Surface Reflectance)</option>
+                                <option value="sentinel2">Sentinel-2 (Surface Reflectance)</option>
+                                <option value="modis">MODIS NDVI</option>
+                                <option value="srtm">SRTM Elevation</option>
+                            </select>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" id="startDate" class="form-control" value="2023-01-01" />
+                                <span class="input-group-text">to</span>
+                                <input type="date" id="endDate" class="form-control" value="2023-12-31" />
+                            </div>
+                        </div>
+
+                        <!-- Visualization Parameters -->
+                        <div class="mb-3">
+                            <label class="form-label">Visualization</label>
+                            <select id="visSelect" class="form-select">
+                                <option value="trueColor">True Color (RGB)</option>
+                                <option value="falseColor">False Color (NIR, Red, Green)</option>
+                                <option value="ndvi">NDVI</option>
+                                <option value="elevation">Elevation</option>
+                            </select>
+                        </div>
+
+                        <!-- Control Buttons -->
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="loadDataBtn" class="btn btn-success">
+                                <i class="fas fa-sync"></i> Load Data
+                            </button>
+                            <button id="addLayerBtn" class="btn btn-primary">
+                                <i class="fas fa-layer-group"></i> Add Layer
+                            </button>
+                            <button id="clearLayersBtn" class="btn btn-warning">
+                                <i class="fas fa-trash-alt"></i> Clear Layers
+                            </button>
+                            <button id="exportBtn" class="btn btn-info">
+                                <i class="fas fa-download"></i> Export Image
+                            </button>
+                        </div>
+
+                        <!-- Analysis Tools -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-chart-line"></i> Analysis Tools</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button id="ndviBtn" class="btn btn-outline-success">
+                                        Calculate NDVI
+                                    </button>
+                                    <button id="timeSeriesBtn" class="btn btn-outline-primary">
+                                        Time Series
+                                    </button>
+                                    <button id="statsBtn" class="btn btn-outline-info">
+                                        Get Statistics
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Layer List -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-list"></i> Active Layers</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul id="layerList" class="list-group">
+                                    <!-- Layers will be added here dynamically -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Chlorophyll Monitor -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-water"></i> Chlorophyll Monitor</h6>
+                            </div>
+                            <div class="card-body">
+                                <label class="form-label">ROI: St. Johns River (project asset)</label>
+                                <div class="mb-2 small text-muted">Uses COPERNICUS/S2_SR_HARMONIZED to compute Chlorophyll Index</div>
+
+                                <label class="form-label">Start Date</label>
+                                <input id="chlStartDate" type="date" class="form-control" value="2020-01-01" />
+
+                                <label class="form-label mt-2">End Date</label>
+                                <input id="chlEndDate" type="date" class="form-control" value="2020-12-31" />
+
+                                <div class="d-grid gap-2 mt-3">
+                                    <button id="chlRunBtn" class="btn btn-success">RUN</button>
+                                    <button id="chlExportBtn" class="btn btn-info">Export Selected Image</button>
+                                </div>
+
+                                <hr />
+                                <div id="chlMessage" class="small text-muted mb-2">No results yet.</div>
+                                <canvas id="chlChart" width="300" height="200" style="background:#fff;border-radius:6px;"></canvas>
+                                <div id="chlImagePreview" class="mt-2"></div>
+                                <div id="chlLegend" class="mt-2"></div>
+                            </div>
+                        </div>
+                        <!-- End Chlorophyll Monitor -->
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div class="col-md-9">
+                <div class="card map-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-map"></i> Interactive Map</h5>
+                        <div class="map-controls">
+                            <button id="fullscreenBtn" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="map" style="height: 600px;"></div>
+                    </div>
+                </div>
+
+                <!-- Info Panel -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6><i class="fas fa-info-circle"></i> Information Panel</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="infoPanel">
+                            <p>Select an area or click on the map to get information.</p>
+                            <div id="coordinates" class="text-muted small"></div>
+                            <div id="pixelValue" class="mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for Notifications -->
+    <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>

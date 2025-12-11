@@ -1,0 +1,200 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #1abc9c;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Loading Overlay */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cards */
+.sidebar-card, .map-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.map-card .card-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+/* Map */
+#map {
+    height: 600px;
+    width: 100%;
+    border-radius: 0 0 10px 10px;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    border: none;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #1abc9c 0%, #17a589 100%);
+    border: none;
+}
+
+/* Layer List */
+.layer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border-left: 4px solid var(--secondary-color);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.layer-controls button {
+    padding: 2px 6px;
+    margin-left: 5px;
+}
+
+/* Toast Customization */
+.toast {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Form Controls */
+.form-select, .form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Chlorophyll Monitor Styles */
+#chlChart {
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+#chlImagePreview .card {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    padding: 6px 8px;
+    background: #fdfdfd;
+    margin-top: 4px;
+    font-size: 0.9rem;
+}
+
+#chlLegend {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 6px 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .col-md-3 {
+        margin-bottom: 20px;
+    }
+    
+    #map {
+        height: 400px;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+/* Hover Effects */
+.list-group-item:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+/* Animation for new layers */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
